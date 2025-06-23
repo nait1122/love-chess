@@ -579,3 +579,36 @@ html {
   font-weight: bold;
   flex-shrink: 0;
 }
+
+/* --- 新增：开始界面样式 --- */
+#start-screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--board-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease;
+}
+
+#start-game-button {
+  padding: 20px 40px;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--text-color);
+  background-color: var(--blue-accent);
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#start-game-button:hover {
+  transform: translateY(-3px);
+  background-color: var(--dark-blue);
+}

@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- DOM Elements ---
+  const startScreen = document.getElementById('start-screen-overlay');
+  const startButton = document.getElementById('start-game-button');
+  const appContainer = document.querySelector('.app-container');
+
   const boardElement = document.getElementById('board');
   const player1Element = document.getElementById('player1');
   const player2Element = document.getElementById('player2');
@@ -358,14 +362,15 @@ document.addEventListener('DOMContentLoaded', () => {
    * Resets the game to its initial state
    */
   function resetGame() {
-    modal.classList.remove('visible');
     players.forEach(p => p.position = 0);
     currentPlayerIndex = 0;
     isGameActive = true;
-    diceElement.style.transform = 'rotateX(0deg) rotateY(0deg) rotateZ(0deg)';
-    femaleSwitch.classList.add('active');
-    maleSwitch.classList.remove('active');
-    players.forEach(updatePlayerPosition);
+    createBoard(); // Re-create board to clear any lingering states
+    createPlayerElements(); // Re-create player elements
+    players.forEach(p => updatePlayerPosition(p));
+    modal.classList.remove('active');
+    switchPlayer(); // To set the correct active UI on the switch
+    switchPlayer(); // Call it twice to get back to player 1
   }
 
   function triggerTask() {
@@ -515,34 +520,63 @@ document.addEventListener('DOMContentLoaded', () => {
     resetGame(); // Reset game to reflect any changes
   }
 
-  /**
-   * Initializes the entire game.
-   */
-  function init() {
-    loadGameplayData();
+  function initGame() {
     createBoard();
     createPlayerElements();
-    setupEventListeners();
+    players.forEach(p => updatePlayerPosition(p));
+    loadCellTasks();
+    loadGameplayData();
+    renderSetManager(); // Render the set manager UI
     setupDiceFaces();
-    resetGame(); // This is now the final step
+    // Set initial active player switch
+    if (currentPlayerIndex === 0) {
+      femaleSwitch.classList.add('active');
+      maleSwitch.classList.remove('active');
+    } else {
+      maleSwitch.classList.add('active');
+      femaleSwitch.classList.remove('active');
+    }
+    setupEventListeners();
+    isGameActive = true; // Make game active after setup
+  }
+
+  function startGame() {
+    // Hide start screen and show the main app
+    startScreen.style.opacity = '0';
+    setTimeout(() => {
+      startScreen.style.display = 'none';
+    }, 500); // Match CSS transition time
+    appContainer.style.visibility = 'visible';
+
+    // IMPORTANT: Load audio assets now, after user interaction
+    audioDiceRoll.load();
+    audioPawnMove.load();
+    audioTaskComplete.load();
+
+    // Now, initialize the rest of the game
+    initGame();
+  }
+
+  function init() {
+    // Only set up the start button listener initially
+    startButton.addEventListener('click', startGame);
   }
 
   function setupEventListeners() {
     diceContainer.addEventListener('click', rollDice);
+    resetButton.addEventListener('click', resetGame);
     addNewSetButton.addEventListener('click', addNewSet);
     menuButton.addEventListener('click', openEditor);
     closeEditorButton.addEventListener('click', closeEditor);
     femaleSwitch.addEventListener('click', () => {
-      if (!isGameActive && currentPlayerIndex !== 0) return;
-      currentPlayerIndex = 0;
-      femaleSwitch.classList.add('active');
-      maleSwitch.classList.remove('active');
+      if (isGameActive && currentPlayerIndex !== 0) {
+        switchPlayer();
+      }
     });
     maleSwitch.addEventListener('click', () => {
-      if (!isGameActive && currentPlayerIndex !== 1) return;
-      currentPlayerIndex = 1;
-      maleSwitch.classList.add('active');
-      femaleSwitch.classList.remove('active');
+      if (isGameActive && currentPlayerIndex !== 1) {
+        switchPlayer();
+      }
     });
     window.addEventListener('resize', () => {
       createBoard();
@@ -550,5 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- Initialisation ---
   init();
 }); 
