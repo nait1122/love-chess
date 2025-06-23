@@ -82,6 +82,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Functions ---
 
+  /**
+   * Safely plays a sound, handling browser policies and loading.
+   * @param {HTMLAudioElement} audioElement The audio element to play.
+   */
+  async function playSound(audioElement) {
+    try {
+      // Resetting currentTime is important for re-playing sounds quickly.
+      audioElement.currentTime = 0;
+      // The play() method returns a Promise. We'll wait for it to resolve.
+      await audioElement.play();
+    } catch (error) {
+      // Log errors for debugging, but don't crash the game.
+      // This can happen if the user hasn't interacted with the page yet.
+      console.warn("Audio play failed:", error);
+    }
+  }
+
   function loadGameplayData() {
     const savedData = localStorage.getItem('loveLudoGameplayData');
     if (savedData) {
@@ -198,8 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       player.position = current;
       player.element.classList.add('is-moving');
       updatePlayerPosition(player);
-      audioPawnMove.currentTime = 0;
-      audioPawnMove.play();
+      playSound(audioPawnMove);
 
       setTimeout(() => {
         player.element.classList.remove('is-moving');
@@ -233,9 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isGameActive) return;
     isGameActive = false;
 
-    // Play sound
-    audioDiceRoll.currentTime = 0;
-    audioDiceRoll.play();
+    // Play sound safely
+    playSound(audioDiceRoll);
 
     // Generate a random roll
     const roll = Math.floor(Math.random() * 6) + 1;
@@ -322,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function endGame(winner) {
     isGameActive = false;
     showModal('游戏结束!', `恭喜玩家 ${winner.name} 获得了胜利!`, '再来一局');
+    playSound(audioTaskComplete);
     modalButton.onclick = resetGame;
   }
 
@@ -333,6 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
     modalText.textContent = text;
     modalButton.textContent = buttonText;
     modal.classList.add('visible');
+    if (title !== '游戏结束!') {
+      playSound(audioTaskComplete);
+    }
   }
 
   /**
@@ -361,8 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showModal('情侣任务 ❤️', task, "任务完成");
     modalButton.onclick = () => {
       modal.classList.remove('visible');
-      audioTaskComplete.currentTime = 0;
-      audioTaskComplete.play();
+      playSound(audioTaskComplete);
       switchPlayer();
     };
   }
