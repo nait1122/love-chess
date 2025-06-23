@@ -171,13 +171,16 @@ html {
   position: absolute;
   width: 60px;
   height: 60px;
-  background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid #ccc;
+  /* New style inspired by the image: glossy, amber, and translucent */
+  background: linear-gradient(145deg, rgba(255, 190, 110, 0.85), rgba(225, 120, 0, 0.85));
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   box-sizing: border-box;
   display: grid;
   padding: 8px;
-  gap: 4px;
+  /* Adjusted padding for better dot spacing */
+  gap: 6px;
+  /* Adjusted gap for better dot spacing */
 }
 
 .face.front {
@@ -206,63 +209,135 @@ html {
 
 /* Dot styles */
 .face .dot {
-  background-color: #db3434;
+  /* New style: white and indented */
+  background-color: #f5f5f5;
   border-radius: 50%;
   width: 100%;
   height: 100%;
+  box-shadow: inset 1px 2px 4px rgba(0, 0, 0, 0.6);
 }
 
+/* --- New, Corrected Dice Face Layouts --- */
+
+/* 1-dot face */
 .face[data-dots="1"] {
-  grid-template-areas: ". . ." ". p1 ." ". . .";
+  grid-template-areas: ". . ." ". a ." ". . .";
 }
 
+.face[data-dots="1"]>.dot:nth-child(1) {
+  grid-area: a;
+}
+
+/* 2-dot face */
 .face[data-dots="2"] {
-  grid-template-areas: "p2 . ." ". . ." ". . p7";
+  grid-template-areas: "a . ." ". . ." ". . b";
 }
 
+.face[data-dots="2"]>.dot:nth-child(1) {
+  grid-area: a;
+}
+
+.face[data-dots="2"]>.dot:nth-child(2) {
+  grid-area: b;
+}
+
+/* 3-dot face */
 .face[data-dots="3"] {
-  grid-template-areas: "p2 . ." ". p1 ." ". . p7";
+  grid-template-areas: "a . ." ". b ." ". . c";
 }
 
+.face[data-dots="3"]>.dot:nth-child(1) {
+  grid-area: a;
+}
+
+.face[data-dots="3"]>.dot:nth-child(2) {
+  grid-area: b;
+}
+
+.face[data-dots="3"]>.dot:nth-child(3) {
+  grid-area: c;
+}
+
+/* 4-dot face */
 .face[data-dots="4"] {
-  grid-template-areas: "p2 . p3" ". . ." "p6 . p7";
+  grid-template-areas: "a . b" ". . ." "c . d";
 }
 
+.face[data-dots="4"]>.dot:nth-child(1) {
+  grid-area: a;
+}
+
+.face[data-dots="4"]>.dot:nth-child(2) {
+  grid-area: b;
+}
+
+.face[data-dots="4"]>.dot:nth-child(3) {
+  grid-area: c;
+}
+
+.face[data-dots="4"]>.dot:nth-child(4) {
+  grid-area: d;
+}
+
+/* 5-dot face */
 .face[data-dots="5"] {
-  grid-template-areas: "p2 . p3" ". p1 ." "p6 . p7";
+  grid-template-areas: "a . b" ". c ." "d . e";
 }
 
+.face[data-dots="5"]>.dot:nth-child(1) {
+  grid-area: a;
+}
+
+.face[data-dots="5"]>.dot:nth-child(2) {
+  grid-area: b;
+}
+
+.face[data-dots="5"]>.dot:nth-child(3) {
+  grid-area: c;
+}
+
+.face[data-dots="5"]>.dot:nth-child(4) {
+  grid-area: d;
+}
+
+.face[data-dots="5"]>.dot:nth-child(5) {
+  grid-area: e;
+}
+
+/* 6-dot face - uses a 2x3 grid for a natural look */
 .face[data-dots="6"] {
-  grid-template-areas: "p2 . p3" "p4 . p5" "p6 . p7";
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-areas:
+    "a b"
+    "c d"
+    "e f";
 }
 
-.dot.p1 {
-  grid-area: p1;
+.face[data-dots="6"]>.dot:nth-child(1) {
+  grid-area: a;
 }
 
-.dot.p2 {
-  grid-area: p2;
+.face[data-dots="6"]>.dot:nth-child(2) {
+  grid-area: b;
 }
 
-.dot.p3 {
-  grid-area: p3;
+.face[data-dots="6"]>.dot:nth-child(3) {
+  grid-area: c;
 }
 
-.dot.p4 {
-  grid-area: p4;
+.face[data-dots="6"]>.dot:nth-child(4) {
+  grid-area: d;
 }
 
-.dot.p5 {
-  grid-area: p5;
+.face[data-dots="6"]>.dot:nth-child(5) {
+  grid-area: e;
 }
 
-.dot.p6 {
-  grid-area: p6;
+.face[data-dots="6"]>.dot:nth-child(6) {
+  grid-area: f;
 }
 
-.dot.p7 {
-  grid-area: p7;
-}
 
 /* 弹窗样式 */
 .modal-overlay {
