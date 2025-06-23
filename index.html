@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>情侣飞行棋</title>
-  <link rel="stylesheet" href="/lovechess/static/css/style.css">
-  <link rel="manifest" href="/lovechess/manifest.json">
+  <link rel="stylesheet" href="./static/css/style.css">
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#FFD1DC">
 </head>
 
@@ -40,12 +40,39 @@
       </div>
       <div id="dice-container">
         <div id="dice" class="dice">
-          <div class="face front"></div>
-          <div class="face back"></div>
-          <div class="face top"></div>
-          <div class="face bottom"></div>
-          <div class="face left"></div>
-          <div class="face right"></div>
+          <div class="face front" data-dots="1">
+            <div class="dot p1"></div>
+          </div>
+          <div class="face back" data-dots="6">
+            <div class="dot p2"></div>
+            <div class="dot p3"></div>
+            <div class="dot p4"></div>
+            <div class="dot p5"></div>
+            <div class="dot p6"></div>
+            <div class="dot p7"></div>
+          </div>
+          <div class="face right" data-dots="3">
+            <div class="dot p2"></div>
+            <div class="dot p1"></div>
+            <div class="dot p7"></div>
+          </div>
+          <div class="face left" data-dots="4">
+            <div class="dot p2"></div>
+            <div class="dot p3"></div>
+            <div class="dot p6"></div>
+            <div class="dot p7"></div>
+          </div>
+          <div class="face top" data-dots="5">
+            <div class="dot p2"></div>
+            <div class="dot p3"></div>
+            <div class="dot p1"></div>
+            <div class="dot p6"></div>
+            <div class="dot p7"></div>
+          </div>
+          <div class="face bottom" data-dots="2">
+            <div class="dot p2"></div>
+            <div class="dot p7"></div>
+          </div>
         </div>
       </div>
     </footer>
@@ -84,7 +111,7 @@
 
   </div>
 
-  <script src="/lovechess/static/js/main.js"></script>
+  <script src="./static/js/main.js"></script>
 </body>
 
 </html>

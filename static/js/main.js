@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Game State ---
   let players = [
-    { id: 1, name: '女', position: 0, element: null, avatar: '/lovechess/static/images/avatar_female.png' },
-    { id: 2, name: '男', position: 0, element: null, avatar: '/lovechess/static/images/avatar_male.png' }
+    { id: 1, name: '女', position: 0, element: null, avatar: './static/images/avatar_female.png' },
+    { id: 2, name: '男', position: 0, element: null, avatar: './static/images/avatar_male.png' }
   ];
   let currentPlayerIndex = 0;
   let isGameActive = true;
@@ -225,12 +225,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isGameActive) return;
     isGameActive = false;
 
+    // Generate a random roll
     const roll = Math.floor(Math.random() * 6) + 1;
-    diceContainer.style.animation = 'roll 1s ease-out';
-    diceElement.textContent = roll;
+
+    // Apply rotation for the 3D dice effect
+    // These rotations are chosen to show the correct face for a standard dice layout
+    const rotations = {
+      1: 'rotateY(0deg)',       // Face 1 -> Front
+      2: 'rotateX(90deg)',      // Face 2 -> Bottom
+      3: 'rotateY(-90deg)',     // Face 3 -> Right
+      4: 'rotateY(90deg)',      // Face 4 -> Left
+      5: 'rotateX(-90deg)',     // Face 5 -> Top
+      6: 'rotateY(180deg)'      // Face 6 -> Back
+    };
+    // Add some random spin for a more dynamic feel
+    const randomX = (Math.floor(Math.random() * 4)) * 360;
+    const randomY = (Math.floor(Math.random() * 4)) * 360;
+    const randomZ = (Math.floor(Math.random() * 4)) * 360;
+
+    diceElement.style.transform = `rotateX(${randomX}deg) rotateY(${randomY}deg) rotateZ(${randomZ}deg) ${rotations[roll]}`;
 
     setTimeout(() => {
-      diceContainer.style.animation = '';
       const player = players[currentPlayerIndex];
       let endPosition = player.position + roll;
 
@@ -316,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     players.forEach(p => p.position = 0);
     currentPlayerIndex = 0;
     isGameActive = true;
-    diceElement.textContent = '🎲';
+    diceElement.style.transform = 'rotateX(0deg) rotateY(0deg) rotateZ(0deg)';
     femaleSwitch.classList.add('active');
     maleSwitch.classList.remove('active');
     players.forEach(updatePlayerPosition);

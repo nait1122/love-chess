@@ -150,10 +150,13 @@ html {
 }
 
 #dice-container {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  /* Adjusted for better mobile look */
+  height: 60px;
+  /* Adjusted for better mobile look */
   perspective: 1000px;
   cursor: pointer;
+  /* Removed background to avoid ugly white box */
 }
 
 #dice {
@@ -162,19 +165,104 @@ html {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 1s;
-  font-size: 48px;
-  line-height: 80px;
-  text-align: center;
-  background-color: #fff;
-  border: 2px solid #333;
-  border-radius: 12px;
-  font-weight: bold;
-  color: #333;
 }
 
-/* Remove complex 3D face styles for a simpler, clearer 2D look */
-#dice .face {
-  display: none;
+/* Restore 3D face styles */
+.face {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+  display: grid;
+  padding: 8px;
+  gap: 4px;
+}
+
+.face.front {
+  transform: rotateY(0deg) translateZ(30px);
+}
+
+.face.back {
+  transform: rotateY(180deg) translateZ(30px);
+}
+
+.face.right {
+  transform: rotateY(90deg) translateZ(30px);
+}
+
+.face.left {
+  transform: rotateY(-90deg) translateZ(30px);
+}
+
+.face.top {
+  transform: rotateX(90deg) translateZ(30px);
+}
+
+.face.bottom {
+  transform: rotateX(-90deg) translateZ(30px);
+}
+
+/* Dot styles */
+.face .dot {
+  background-color: #db3434;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+}
+
+.face[data-dots="1"] {
+  grid-template-areas: ". . ." ". p1 ." ". . .";
+}
+
+.face[data-dots="2"] {
+  grid-template-areas: "p2 . ." ". . ." ". . p7";
+}
+
+.face[data-dots="3"] {
+  grid-template-areas: "p2 . ." ". p1 ." ". . p7";
+}
+
+.face[data-dots="4"] {
+  grid-template-areas: "p2 . p3" ". . ." "p6 . p7";
+}
+
+.face[data-dots="5"] {
+  grid-template-areas: "p2 . p3" ". p1 ." "p6 . p7";
+}
+
+.face[data-dots="6"] {
+  grid-template-areas: "p2 . p3" "p4 . p5" "p6 . p7";
+}
+
+.dot.p1 {
+  grid-area: p1;
+}
+
+.dot.p2 {
+  grid-area: p2;
+}
+
+.dot.p3 {
+  grid-area: p3;
+}
+
+.dot.p4 {
+  grid-area: p4;
+}
+
+.dot.p5 {
+  grid-area: p5;
+}
+
+.dot.p6 {
+  grid-area: p6;
+}
+
+.dot.p7 {
+  grid-area: p7;
 }
 
 /* 弹窗样式 */
