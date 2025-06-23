@@ -1,0 +1,30 @@
+{
+  "id": "H5_LoveLudo",
+  "name": "情侣飞行棋",
+  "version": {
+    "name": "1.0.0",
+    "code": "100"
+  },
+  "description": "一款为情侣设计的互动飞行棋游戏",
+  "launch_path": "index.html",
+  "icons": {
+    "72": "static/images/icon.png"
+  },
+  "developer": {
+    "name": "AI Assistant",
+    "email": "",
+    "url": ""
+  },
+  "permissions": {},
+  "plus": {
+    "splashscreen": {
+      "autoclose": true,
+      "waiting": true
+    },
+    "popGesture": "close",
+    "runmode": "normal"
+  },
+  "screenOrientation": [
+    "portrait-primary"
+  ]
+}
