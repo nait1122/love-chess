@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // New Editor DOM elements
   const setListContainer = document.getElementById('set-list-container');
   const addNewSetButton = document.getElementById('add-new-set');
+  const boardContainer = document.getElementById('board-container'); // Added for consistency
 
   // --- Game Configuration ---
   // This is now a fallback/default task list
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const boardLayout = [
-    { index: 21, type: 'flag', icon: '��' },
+    { index: 21, type: 'flag', icon: '🚩' },
     { index: 39, type: 'finish', icon: '🏆' }
   ];
 
@@ -81,12 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedData) {
       gameplayData = JSON.parse(savedData);
     } else {
-      // First time load: create default structure
       gameplayData = {
         activeSetId: 'basic',
-        gameplaySets: {
-          'basic': { id: 'basic', name: '基础版', type: 'random' }
-        }
+        gameplaySets: { 'basic': { id: 'basic', name: '基础版', type: 'random', tasks: {} } }
       };
       saveGameplayData();
     }
@@ -113,9 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function createPlayerElements() {
-    const boardContainer = document.getElementById('board-container');
     players.forEach(player => {
-      if (player.element) return;
+      if (player.element) player.element.remove(); // Remove old element if any
       const playerElement = document.createElement('div');
       playerElement.id = `player-${player.id}`;
       playerElement.classList.add('player');
@@ -129,52 +126,34 @@ document.addEventListener('DOMContentLoaded', () => {
    * Creates the game board UI
    */
   function createBoard() {
-    const boardContainer = document.getElementById('board-container');
     boardContainer.innerHTML = '';
-    cellElements = []; // Clear old elements
-
+    cellElements = [];
     const grid = document.createElement('div');
     grid.className = 'grid';
-
-    const rows = 9;
-    const cols = 7;
-    const cellWidth = containerWidth / cols;
-    const cellHeight = cellWidth; // Force square cells
-
-    // Set the board's height dynamically to fit the square grid
-    boardElement.style.height = `${rows * cellHeight}px`;
 
     cellCoordinates.forEach((coord, i) => {
       const cell = document.createElement('div');
       cell.classList.add('cell');
-
-      const gap = 4; // The visual gap between cells
-      cell.style.left = `${coord.c * cellWidth + gap / 2}px`;
-      cell.style.top = `${coord.r * cellHeight + gap / 2}px`;
-      cell.style.width = `${cellWidth - gap}px`;
-      cell.style.height = `${cellHeight - gap}px`;
+      const gap = 4;
+      const containerWidth = boardContainer.clientWidth;
+      const cellWidth = (containerWidth / 7) - gap;
+      cell.style.position = 'absolute';
+      cell.style.left = `${coord.c * (cellWidth + gap)}px`;
+      cell.style.top = `${coord.r * (cellWidth + gap)}px`;
+      cell.style.width = `${cellWidth}px`;
+      cell.style.height = `${cellWidth}px`;
+      cell.dataset.index = i;
 
       const specialCell = boardLayout.find(c => c.index === i);
       if (specialCell) {
         cell.innerHTML = `<span class="special-icon">${specialCell.icon}</span>`;
+        cell.dataset.special = specialCell.type;
       } else {
         cell.textContent = i + 1;
       }
       grid.appendChild(cell);
       cellElements.push(cell);
     });
-
-    boardLayout.forEach(special => {
-      const cell = cellElements[special.index];
-      if (cell) {
-        const icon = document.createElement('div');
-        icon.className = 'cell-icon';
-        icon.textContent = special.icon;
-        cell.appendChild(icon);
-        cell.dataset.special = special.type;
-      }
-    });
-
     boardContainer.appendChild(grid);
   }
 
@@ -182,73 +161,60 @@ document.addEventListener('DOMContentLoaded', () => {
    * Updates the position of a player's piece on the board
    */
   function updatePlayerPosition(player) {
+    if (!player.element) return;
     const cell = cellElements[player.position];
     if (!cell) return;
 
     const otherPlayer = players.find(p => p.id !== player.id);
     let offset = 0;
-    if (otherPlayer && player.position === otherPlayer.position) {
-      offset = player.id === 1 ? -10 : 10;
+    if (otherPlayer && player.position === otherPlayer.position && player.position > 0) {
+      offset = player.id === 1 ? -(cell.offsetWidth / 4) : (cell.offsetWidth / 4);
     }
-
     player.element.style.left = `${cell.offsetLeft + cell.offsetWidth / 2 - player.element.offsetWidth / 2 + offset}px`;
     player.element.style.top = `${cell.offsetTop + cell.offsetHeight / 2 - player.element.offsetHeight / 2}px`;
   }
 
   function animateMove(player, end, callback) {
     const start = player.position;
+    if (start === end) {
+      if (callback) callback();
+      return;
+    }
     let current = start;
     const direction = (end > start) ? 1 : -1;
 
     const step = () => {
-      if ((direction === 1 && current >= end) || (direction === -1 && current <= end)) {
+      if (current === end) {
         if (callback) callback();
         return;
       }
-
       current += direction;
       player.position = current;
-
       player.element.classList.add('is-moving');
-
       updatePlayerPosition(player);
 
-      player.element.addEventListener('animationend', function handler() {
+      setTimeout(() => {
         player.element.classList.remove('is-moving');
-        setTimeout(step, 50);
-      }, { once: true });
+        if ((direction === 1 && current < end) || (direction === -1 && current > end)) {
+          setTimeout(step, 100);
+        } else {
+          if (callback) callback();
+        }
+      }, 200);
     };
-
     step();
   }
 
   function setupDiceFaces() {
     const faces = diceElement.querySelectorAll('.face');
-    const faceDots = {
-      front: 1, back: 6,
-      right: 2, left: 5,
-      top: 3, bottom: 4
-    };
-
     faces.forEach(face => {
-      const side = Array.from(face.classList).find(c => faceDots[c]);
-      if (!side) return;
-
-      const numDots = faceDots[side];
-      face.setAttribute('data-dots', numDots);
-
-      const patterns = {
-        1: ['p1'], 2: ['p2', 'p7'], 3: ['p2', 'p1', 'p7'],
-        4: ['p2', 'p3', 'p6', 'p7'], 5: ['p2', 'p3', 'p1', 'p6', 'p7'],
-        6: ['p2', 'p3', 'p4', 'p5', 'p6', 'p7']
-      };
-
-      const pattern = patterns[numDots] || [];
-      pattern.forEach(pClass => {
-        const dot = document.createElement('span');
-        dot.classList.add('dot', pClass);
+      face.innerHTML = ''; // Clear existing dots
+      const dotCount = parseInt(face.dataset.dots, 10);
+      for (let i = 0; i < dotCount; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
         face.appendChild(dot);
-      });
+      }
     });
   }
 
@@ -260,47 +226,28 @@ document.addEventListener('DOMContentLoaded', () => {
     isGameActive = false;
 
     const roll = Math.floor(Math.random() * 6) + 1;
-
-    // Random tumbling animation
-    const randomX = (Math.floor(Math.random() * 4) + 4) * 360;
-    const randomY = (Math.floor(Math.random() * 4) + 4) * 360;
-    diceElement.style.transition = 'transform 1s ease-out';
-    diceElement.style.transform = `rotateX(${randomX}deg) rotateY(${randomY}deg)`;
+    diceContainer.style.animation = 'roll 1s ease-out';
+    diceElement.textContent = roll;
 
     setTimeout(() => {
-      const rotations = {
-        1: 'rotateY(0deg)',
-        2: 'rotateY(-90deg)',
-        3: 'rotateX(-90deg)',
-        4: 'rotateX(90deg)',
-        5: 'rotateY(90deg)',
-        6: 'rotateY(180deg)'
-      };
-      diceElement.style.transition = 'transform 0.5s ease-in';
-      diceElement.style.transform = rotations[roll];
+      diceContainer.style.animation = '';
+      const player = players[currentPlayerIndex];
+      let endPosition = player.position + roll;
 
-      setTimeout(() => {
-        const player = players[currentPlayerIndex];
-        let endPosition = player.position + roll;
-
-        const onMoveComplete = () => {
-          const specialCell = boardLayout.find(c => c.index === player.position);
-          // If it's a special move cell, handle that first. The task will be triggered after.
-          if (specialCell && (specialCell.type === 'forward' || specialCell.type === 'backward')) {
-            handleSpecialCell(player, specialCell);
-          } else {
-            // For normal cells, just trigger a task.
-            triggerTask();
-          }
-        };
-
-        if (endPosition >= boardSize - 1) {
-          endPosition = boardSize - 1;
-          animateMove(player, endPosition, () => endGame(player));
+      const onMoveComplete = () => {
+        const specialCell = boardLayout.find(c => c.index === player.position);
+        if (specialCell) {
+          handleSpecialCell(player, specialCell);
         } else {
-          animateMove(player, endPosition, onMoveComplete);
+          triggerTask();
         }
-      }, 700);
+      };
+      if (endPosition >= boardSize - 1) {
+        endPosition = boardSize - 1;
+        animateMove(player, endPosition, () => endGame(player));
+      } else {
+        animateMove(player, endPosition, onMoveComplete);
+      }
     }, 1000);
   }
 
@@ -369,10 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     players.forEach(p => p.position = 0);
     currentPlayerIndex = 0;
     isGameActive = true;
-
-    diceElement.style.transition = 'transform 0.5s';
-    diceElement.style.transform = 'rotateY(0deg)';
-
+    diceElement.textContent = '🎲';
     femaleSwitch.classList.add('active');
     maleSwitch.classList.remove('active');
     players.forEach(updatePlayerPosition);
@@ -381,14 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function triggerTask() {
     const activeSet = gameplayData.gameplaySets[gameplayData.activeSetId];
     let task = "安全格，休息一下吧~";
-
     if (activeSet.type === 'random') {
       task = defaultTasks[Math.floor(Math.random() * defaultTasks.length)];
-    } else { // 'cell_based'
+    } else {
       const player = players[currentPlayerIndex];
       task = activeSet.tasks[player.position] || task;
     }
-
     showModal('情侣任务 ❤️', task, "任务完成");
     modalButton.onclick = () => {
       modal.style.display = 'none';
@@ -420,25 +362,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTaskGrid() {
     editorGrid.innerHTML = '';
     const activeSet = gameplayData.gameplaySets[gameplayData.activeSetId];
-
     if (activeSet.type === 'random') {
       editorGrid.innerHTML = '<p style="text-align: center; padding: 20px;">"基础版"使用随机任务，无需编辑。</p>';
       return;
     }
-
     for (let i = 0; i < boardSize; i++) {
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'cell-task-input';
       input.value = activeSet.tasks[i] || '';
       input.dataset.index = i;
-
       input.addEventListener('input', (e) => {
         const index = parseInt(e.target.dataset.index, 10);
         activeSet.tasks[index] = e.target.value;
         saveGameplayData();
       });
-
       const item = document.createElement('div');
       item.className = 'editor-item';
       const number = document.createElement('span');
@@ -453,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchActiveSet(setId) {
     gameplayData.activeSetId = setId;
     saveGameplayData();
-    renderEditor(); // Re-render the whole editor to reflect the change
+    renderEditor();
   }
 
   function addNewSet() {
@@ -475,19 +413,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeEditor() {
     editorModal.style.display = 'none';
+    resetGame(); // Reset game to reflect any changes
   }
 
   /**
    * Initializes the entire game.
    */
   function init() {
+    loadGameplayData();
     createBoard();
     createPlayerElements();
-    loadGameplayData();
-    loadCellTasks();
     setupEventListeners();
     setupDiceFaces();
-    resetGame();
+    resetGame(); // This is now the final step
   }
 
   function setupEventListeners() {
