@@ -122,8 +122,10 @@ html {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 20px 0;
+  padding: 10px;
   flex-shrink: 0;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .player-switch {
@@ -151,112 +153,28 @@ html {
   width: 80px;
   height: 80px;
   perspective: 1000px;
+  cursor: pointer;
 }
 
-.dice {
+#dice {
   width: 100%;
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 1s;
-}
-
-.face {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background-color: rgba(240, 240, 240, 0.95);
-  border: 1px solid #ccc;
+  font-size: 48px;
+  line-height: 80px;
+  text-align: center;
+  background-color: #fff;
+  border: 2px solid #333;
   border-radius: 12px;
-  box-sizing: border-box;
-  display: grid;
-  padding: 10px;
-  gap: 5px;
+  font-weight: bold;
+  color: #333;
 }
 
-/* Position faces in 3D space */
-.face.front {
-  transform: rotateY(0deg) translateZ(40px);
-}
-
-.face.back {
-  transform: rotateY(180deg) translateZ(40px);
-}
-
-.face.right {
-  transform: rotateY(90deg) translateZ(40px);
-}
-
-.face.left {
-  transform: rotateY(-90deg) translateZ(40px);
-}
-
-.face.top {
-  transform: rotateX(90deg) translateZ(40px);
-}
-
-.face.bottom {
-  transform: rotateX(-90deg) translateZ(40px);
-}
-
-/* Dot styles */
-.face .dot {
-  background-color: #db3434;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-}
-
-.face[data-dots="1"] {
-  grid-template-areas: ". . ." ". p1 ." ". . .";
-}
-
-.face[data-dots="2"] {
-  grid-template-areas: "p2 . ." ". . ." ". . p7";
-}
-
-.face[data-dots="3"] {
-  grid-template-areas: "p2 . ." ". p1 ." ". . p7";
-}
-
-.face[data-dots="4"] {
-  grid-template-areas: "p2 . p3" ". . ." "p6 . p7";
-}
-
-.face[data-dots="5"] {
-  grid-template-areas: "p2 . p3" ". p1 ." "p6 . p7";
-}
-
-.face[data-dots="6"] {
-  grid-template-areas: "p2 . p3" "p4 . p5" "p6 . p7";
-}
-
-.dot.p1 {
-  grid-area: p1;
-}
-
-.dot.p2 {
-  grid-area: p2;
-}
-
-.dot.p3 {
-  grid-area: p3;
-}
-
-.dot.p4 {
-  grid-area: p4;
-}
-
-.dot.p5 {
-  grid-area: p5;
-}
-
-.dot.p6 {
-  grid-area: p6;
-}
-
-.dot.p7 {
-  grid-area: p7;
+/* Remove complex 3D face styles for a simpler, clearer 2D look */
+#dice .face {
+  display: none;
 }
 
 /* 弹窗样式 */
