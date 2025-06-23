@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const playerElement = document.createElement('div');
       playerElement.id = `player-${player.id}`;
       playerElement.classList.add('player');
+      playerElement.dataset.playerId = player.id;
       playerElement.style.backgroundImage = `url(${player.avatar})`;
       boardContainer.appendChild(playerElement);
       player.element = playerElement;
