@@ -247,13 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
       maleSwitch.classList.add('active');
       femaleSwitch.classList.remove('active');
     }
+    modal.classList.remove('active');
+    if (currentPlayerIndex !== 0) switchPlayer();
   }
 
   function endGame(winner) {
     isGameActive = false;
     showModal(`游戏结束！`, `恭喜 ${winner.name} 到达终点！`, '重新开始');
     playSound(audioTaskComplete);
-    modalButton.onclick = resetGame;
+    modalButton.dataset.action = 'reset';
   }
 
   function showModal(title, text, buttonText) {
@@ -286,11 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     showModal('任务来了！', task, '完成任务');
-    modalButton.onclick = () => {
-      modal.classList.remove('active');
-      playSound(audioTaskComplete);
-      switchPlayer();
-    };
+    modalButton.dataset.action = 'next-turn';
   }
 
   // --- Editor Functions ---
@@ -404,6 +402,18 @@ document.addEventListener('DOMContentLoaded', () => {
     menuButton.addEventListener('click', openEditor);
     closeEditorButton.addEventListener('click', closeEditor);
     addNewSetButton.addEventListener('click', addNewSet);
+
+    modalButton.addEventListener('click', () => {
+      const action = modalButton.dataset.action;
+      modal.classList.remove('active');
+
+      if (action === 'next-turn') {
+        playSound(audioTaskComplete);
+        switchPlayer();
+      } else if (action === 'reset') {
+        resetGame();
+      }
+    });
   }
 
   function initGame() {
