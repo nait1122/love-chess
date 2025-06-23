@@ -129,8 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
    * Creates the game board UI
    */
   function createBoard() {
-    const boardContainer = document.querySelector('.board-container');
-    const containerWidth = boardContainer.clientWidth;
+    const boardContainer = document.getElementById('board-container');
+    boardContainer.innerHTML = '';
+    cellElements = []; // Clear old elements
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
 
     const rows = 9;
     const cols = 7;
@@ -139,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set the board's height dynamically to fit the square grid
     boardElement.style.height = `${rows * cellHeight}px`;
-
-    boardElement.innerHTML = '';
-    cellElements = [];
 
     cellCoordinates.forEach((coord, i) => {
       const cell = document.createElement('div');
@@ -159,11 +160,22 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         cell.textContent = i + 1;
       }
-      boardElement.appendChild(cell);
+      grid.appendChild(cell);
       cellElements.push(cell);
     });
 
-    resetGame();
+    boardLayout.forEach(special => {
+      const cell = cellElements[special.index];
+      if (cell) {
+        const icon = document.createElement('div');
+        icon.className = 'cell-icon';
+        icon.textContent = special.icon;
+        cell.appendChild(icon);
+        cell.dataset.special = special.type;
+      }
+    });
+
+    boardContainer.appendChild(grid);
   }
 
   /**
@@ -470,12 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function init() {
     createBoard();
-    createPlayerElements(); // Create player elements first
-    loadGameplayData(); // Load all data
-    loadCellTasks(); // Load tasks
-    setupEventListeners(); // Then set up listeners
-    setupDiceFaces(); // Then setup dice
-    resetGame(); // Finally, reset the game state which positions the players
+    createPlayerElements();
+    loadGameplayData();
+    loadCellTasks();
+    setupEventListeners();
+    setupDiceFaces();
+    resetGame();
   }
 
   function setupEventListeners() {
