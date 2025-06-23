@@ -247,8 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
       maleSwitch.classList.add('active');
       femaleSwitch.classList.remove('active');
     }
-    modal.classList.remove('visible');
-    if (currentPlayerIndex !== 0) switchPlayer();
   }
 
   function endGame(winner) {
@@ -256,6 +254,13 @@ document.addEventListener('DOMContentLoaded', () => {
     showModal(`游戏结束！`, `恭喜 ${winner.name} 到达终点！`, '重新开始');
     playSound(audioTaskComplete);
     modalButton.dataset.action = 'reset';
+    createBoard();
+    createPlayerElements();
+    players.forEach(p => updatePlayerPosition(p));
+    modal.classList.remove('visible');
+    // Manually set the switch UI to the correct starting state
+    femaleSwitch.classList.add('active');
+    maleSwitch.classList.remove('active');
   }
 
   function showModal(title, text, buttonText) {
@@ -273,7 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     createPlayerElements();
     players.forEach(p => updatePlayerPosition(p));
     modal.classList.remove('visible');
-    if (currentPlayerIndex !== 0) switchPlayer();
+    // Manually set the switch UI to the correct starting state
+    femaleSwitch.classList.add('active');
+    maleSwitch.classList.remove('active');
+    triggerTask();
   }
 
   function triggerTask() {
