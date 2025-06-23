@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let startScreen, startButton, appContainer, boardContainer, diceContainer, diceElement,
     femaleSwitch, maleSwitch, modal, modalTitle, modalText, modalButton, editorModal,
     closeEditorButton, editorGrid, menuButton, setListContainer, addNewSetButton,
-    resetButton, audioDiceRoll, audioPawnMove, audioTaskComplete;
+    resetButton;
 
   // --- Game Configuration ---
   const defaultTasks = [
@@ -73,9 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setListContainer = document.getElementById('set-list-container');
     addNewSetButton = document.getElementById('add-new-set');
     resetButton = document.getElementById('reset-button');
-    audioDiceRoll = document.getElementById('audio-dice-roll');
-    audioPawnMove = document.getElementById('audio-pawn-move');
-    audioTaskComplete = document.getElementById('audio-task-complete');
+
+    // 动态创建音频对象，而不是从HTML获取
+    audioDiceRoll = new Audio('https://actions.google.com/sounds/v1/dice/dice_roll_d20.mp3');
+    audioPawnMove = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.mp3');
+    audioTaskComplete = new Audio('https://actions.google.com/sounds/v1/ui/ui_tap_forward.mp3');
   }
 
   function loadGameplayData() {
