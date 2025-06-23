@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const addNewSetButton = document.getElementById('add-new-set');
   const boardContainer = document.getElementById('board-container'); // Added for consistency
 
+  // --- Audio Elements ---
+  const audioDiceRoll = document.getElementById('audio-dice-roll');
+  const audioPawnMove = document.getElementById('audio-pawn-move');
+  const audioTaskComplete = document.getElementById('audio-task-complete');
+
   // --- Game Configuration ---
   // This is now a fallback/default task list
   const defaultTasks = [
@@ -193,6 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
       player.position = current;
       player.element.classList.add('is-moving');
       updatePlayerPosition(player);
+      audioPawnMove.currentTime = 0;
+      audioPawnMove.play();
 
       setTimeout(() => {
         player.element.classList.remove('is-moving');
@@ -225,6 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function rollDice() {
     if (!isGameActive) return;
     isGameActive = false;
+
+    // Play sound
+    audioDiceRoll.currentTime = 0;
+    audioDiceRoll.play();
 
     // Generate a random roll
     const roll = Math.floor(Math.random() * 6) + 1;
@@ -280,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showModal(`特殊格子: ${cell.icon}`, message, "继续");
     modalButton.onclick = () => {
-      modal.style.display = 'none';
+      modal.classList.remove('visible');
       if (cell.type === 'backward') {
         let endPos = player.position + cell.value;
         if (endPos < 0) endPos = 0;
@@ -321,14 +332,14 @@ document.addEventListener('DOMContentLoaded', () => {
     modalTitle.textContent = title;
     modalText.textContent = text;
     modalButton.textContent = buttonText;
-    modal.style.display = 'flex';
+    modal.classList.add('visible');
   }
 
   /**
    * Resets the game to its initial state
    */
   function resetGame() {
-    modal.style.display = 'none';
+    modal.classList.remove('visible');
     players.forEach(p => p.position = 0);
     currentPlayerIndex = 0;
     isGameActive = true;
@@ -349,7 +360,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showModal('情侣任务 ❤️', task, "任务完成");
     modalButton.onclick = () => {
-      modal.style.display = 'none';
+      modal.classList.remove('visible');
+      audioTaskComplete.currentTime = 0;
+      audioTaskComplete.play();
       switchPlayer();
     };
   }
@@ -363,6 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSetManager() {
     setListContainer.innerHTML = '';
     Object.values(gameplayData.gameplaySets).forEach(set => {
+      // Create a container for the button and its actions
+      const setItemContainer = document.createElement('div');
+      setItemContainer.className = 'set-item-container';
+
       const setButton = document.createElement('button');
       setButton.className = 'set-btn';
       setButton.textContent = set.name;
@@ -371,7 +388,27 @@ document.addEventListener('DOMContentLoaded', () => {
         setButton.classList.add('active');
       }
       setButton.addEventListener('click', () => switchActiveSet(set.id));
-      setListContainer.appendChild(setButton);
+
+      setItemContainer.appendChild(setButton);
+
+      // Add rename and delete buttons for custom sets only
+      if (set.type !== 'random') {
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'set-action-btn rename-btn';
+        renameBtn.innerHTML = '✏️'; //Pencil icon
+        renameBtn.title = '重命名';
+        renameBtn.addEventListener('click', () => renameSet(set.id));
+        setItemContainer.appendChild(renameBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'set-action-btn delete-btn';
+        deleteBtn.innerHTML = '🗑️'; // Trash can icon
+        deleteBtn.title = '删除';
+        deleteBtn.addEventListener('click', () => deleteSet(set.id));
+        setItemContainer.appendChild(deleteBtn);
+      }
+
+      setListContainer.appendChild(setItemContainer);
     });
   }
 
@@ -420,6 +457,34 @@ document.addEventListener('DOMContentLoaded', () => {
       tasks: Array(boardSize).fill("点击编辑任务...")
     };
     switchActiveSet(newId);
+  }
+
+  function renameSet(setId) {
+    const currentSet = gameplayData.gameplaySets[setId];
+    if (!currentSet) return;
+
+    const newName = prompt('请输入新的玩法名称：', currentSet.name);
+    if (newName && newName.trim() !== '') {
+      currentSet.name = newName.trim();
+      saveGameplayData();
+      renderSetManager(); // Re-render to show the new name
+    }
+  }
+
+  function deleteSet(setId) {
+    if (setId === 'basic') {
+      alert('基础版不能删除哦！');
+      return;
+    }
+    if (confirm(`确定要删除这个玩法版本吗？此操作不可撤销。`)) {
+      delete gameplayData.gameplaySets[setId];
+      // If the deleted set was the active one, fall back to basic
+      if (gameplayData.activeSetId === setId) {
+        gameplayData.activeSetId = 'basic';
+      }
+      saveGameplayData();
+      renderEditor(); // Re-render the whole editor view
+    }
   }
 
   function openEditor() {
