@@ -1,12 +1,11 @@
 {
   "name": "情侣飞行棋",
   "short_name": "情侣飞行棋",
-  "description": "一款为情侣设计的互动飞行棋游戏",
+  "description": "一款为情侣设计的飞行棋游戏，充满了爱与挑战。",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#2c2c3e",
-  "theme_color": "#2c2c3e",
-  "version": "1.0.0",
+  "background_color": "#fff1f5",
+  "theme_color": "#ff8fab",
   "icons": [
     {
       "src": "./static/images/avatar_female.png",
