@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addNewSetButton = document.getElementById('add-new-set');
     resetButton = document.getElementById('reset-button');
 
-    // 动态创建音频对象，而不是从HTML获取
-    audioDiceRoll = new Audio('https://actions.google.com/sounds/v1/dice/dice_roll_d20.mp3');
-    audioPawnMove = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.mp3');
-    audioTaskComplete = new Audio('https://actions.google.com/sounds/v1/ui/ui_tap_forward.mp3');
+    // 动态创建音频对象，并使用开放的GitHub Raw链接
+    audioDiceRoll = new Audio('https://raw.githubusercontent.com/Kavex/Game-Sound-Effects-LIbrary/master/Dice/dice-rolling-7-times.mp3');
+    audioPawnMove = new Audio('https://raw.githubusercontent.com/Kavex/Game-Sound-Effects-LIbrary/master/UI/Click_Electronic_20.mp3');
+    audioTaskComplete = new Audio('https://raw.githubusercontent.com/Kavex/Game-Sound-Effects-LIbrary/master/UI/Confirmation_Notification_02.mp3');
   }
 
   function loadGameplayData() {
