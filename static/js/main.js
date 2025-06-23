@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
       maleSwitch.classList.add('active');
       femaleSwitch.classList.remove('active');
     }
-    modal.classList.remove('active');
+    modal.classList.remove('visible');
     if (currentPlayerIndex !== 0) switchPlayer();
   }
 
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modalTitle.textContent = title;
     modalText.textContent = text;
     modalButton.textContent = buttonText;
-    modal.classList.add('active');
+    modal.classList.add('visible');
   }
 
   function resetGame() {
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createBoard();
     createPlayerElements();
     players.forEach(p => updatePlayerPosition(p));
-    modal.classList.remove('active');
+    modal.classList.remove('visible');
     if (currentPlayerIndex !== 0) switchPlayer();
   }
 
@@ -391,8 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function openEditor() { editorModal.classList.add('active'); renderEditor(); }
-  function closeEditor() { editorModal.classList.remove('active'); }
+  function openEditor() { editorModal.classList.add('visible'); renderEditor(); }
+  function closeEditor() { editorModal.classList.remove('visible'); }
 
   function setupEventListeners() {
     diceContainer.addEventListener('click', rollDice);
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalButton.addEventListener('click', () => {
       const action = modalButton.dataset.action;
-      modal.classList.remove('active');
+      modal.classList.remove('visible');
 
       if (action === 'next-turn') {
         playSound(audioTaskComplete);
