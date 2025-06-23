@@ -1,38 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // --- DOM Elements ---
-  const startScreen = document.getElementById('start-screen-overlay');
-  const startButton = document.getElementById('start-game-button');
-  const appContainer = document.querySelector('.app-container');
-
-  const boardElement = document.getElementById('board');
-  const player1Element = document.getElementById('player1');
-  const player2Element = document.getElementById('player2');
-  const diceContainer = document.getElementById('dice-container');
-  const diceElement = document.getElementById('dice');
-  const diceFace = document.querySelector('.dice-face');
-  const femaleSwitch = document.getElementById('switch-female');
-  const maleSwitch = document.getElementById('switch-male');
-  const modal = document.getElementById('modal');
-  const modalTitle = document.getElementById('modal-title');
-  const modalText = document.getElementById('modal-text');
-  const modalButton = document.getElementById('modal-button');
-  // Editor DOM Elements
-  const editorModal = document.getElementById('editor-modal');
-  const closeEditorButton = document.getElementById('close-editor');
-  const editorGrid = document.getElementById('editor-grid');
-  const menuButton = document.querySelector('.menu-icons .icon-button:last-child'); // The hamburger menu
-  // New Editor DOM elements
-  const setListContainer = document.getElementById('set-list-container');
-  const addNewSetButton = document.getElementById('add-new-set');
-  const boardContainer = document.getElementById('board-container'); // Added for consistency
-
-  // --- Audio Elements ---
-  const audioDiceRoll = document.getElementById('audio-dice-roll');
-  const audioPawnMove = document.getElementById('audio-pawn-move');
-  const audioTaskComplete = document.getElementById('audio-task-complete');
+  // --- DOM Element Variables ---
+  // We declare them here and will assign them inside initGame to ensure they exist.
+  let startScreen, startButton, appContainer, boardContainer, diceContainer, diceElement,
+    femaleSwitch, maleSwitch, modal, modalTitle, modalText, modalButton, editorModal,
+    closeEditorButton, editorGrid, menuButton, setListContainer, addNewSetButton,
+    resetButton, audioDiceRoll, audioPawnMove, audioTaskComplete;
 
   // --- Game Configuration ---
-  // This is now a fallback/default task list
   const defaultTasks = [
     "夸对方三个优点。", "给对方一个深情的拥抱，持续10秒。", "模仿对方一个可爱的表情或口头禅。",
     "说出第一次见面的地点和天气。", "给对方唱一首情歌的副歌部分。", "用三种不同的方式称呼对方。",
@@ -45,24 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     "交换角色，用对方的语气说一句话。", "一起看手机里最早的一张合照。", "真诚地感谢对方为你做的一件事。",
     "挠对方痒痒10秒。", "约定一件想和对方一起完成的事。", "给对方一个额头吻。"
   ];
-
-  let cellTasks = []; // This will hold the task for each cell
-
   const boardSize = 40;
-  // Reverting to the previous, more compact layout
   const cellCoordinates = [
     { c: 6, r: 0 }, { c: 5, r: 0 }, { c: 4, r: 0 }, { c: 3, r: 0 }, { c: 2, r: 0 }, { c: 1, r: 0 }, { c: 0, r: 0 },
-    { c: 0, r: 1 },
-    { c: 1, r: 1 }, { c: 2, r: 1 }, { c: 3, r: 1 }, { c: 4, r: 1 }, { c: 5, r: 1 }, { c: 6, r: 1 },
-    { c: 6, r: 2 },
-    { c: 5, r: 2 }, { c: 4, r: 2 }, { c: 3, r: 2 }, { c: 2, r: 2 }, { c: 1, r: 2 }, { c: 0, r: 2 },
-    { c: 0, r: 3 }, { c: 0, r: 4 },
-    { c: 1, r: 4 }, { c: 2, r: 4 }, { c: 3, r: 4 }, { c: 4, r: 4 }, { c: 5, r: 4 }, { c: 6, r: 4 },
-    { c: 6, r: 5 }, { c: 6, r: 6 },
-    { c: 5, r: 6 }, { c: 4, r: 6 }, { c: 3, r: 6 }, { c: 2, r: 6 }, { c: 1, r: 6 }, { c: 0, r: 6 },
+    { c: 0, r: 1 }, { c: 1, r: 1 }, { c: 2, r: 1 }, { c: 3, r: 1 }, { c: 4, r: 1 }, { c: 5, r: 1 }, { c: 6, r: 1 },
+    { c: 6, r: 2 }, { c: 5, r: 2 }, { c: 4, r: 2 }, { c: 3, r: 2 }, { c: 2, r: 2 }, { c: 1, r: 2 }, { c: 0, r: 2 },
+    { c: 0, r: 3 }, { c: 0, r: 4 }, { c: 1, r: 4 }, { c: 2, r: 4 }, { c: 3, r: 4 }, { c: 4, r: 4 }, { c: 5, r: 4 }, { c: 6, r: 4 },
+    { c: 6, r: 5 }, { c: 6, r: 6 }, { c: 5, r: 6 }, { c: 4, r: 6 }, { c: 3, r: 6 }, { c: 2, r: 6 }, { c: 1, r: 6 }, { c: 0, r: 6 },
     { c: 0, r: 7 }, { c: 1, r: 7 }, { c: 2, r: 7 }
   ];
-
   const boardLayout = [
     { index: 21, type: 'flag', icon: '🚩' },
     { index: 39, type: 'finish', icon: '🏆' }
@@ -76,31 +41,41 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentPlayerIndex = 0;
   let isGameActive = true;
   let cellElements = [];
-
-  // New data structure for gameplay versions
   let gameplayData = {};
-
-  const diceButton = document.getElementById('dice');
-  const resetButton = document.getElementById('reset-button');
-  const editTasksButton = document.getElementById('edit-tasks-button');
 
   // --- Functions ---
 
-  /**
-   * Safely plays a sound, handling browser policies and loading.
-   * @param {HTMLAudioElement} audioElement The audio element to play.
-   */
   async function playSound(audioElement) {
+    if (!audioElement) return;
     try {
-      // Resetting currentTime is important for re-playing sounds quickly.
       audioElement.currentTime = 0;
-      // The play() method returns a Promise. We'll wait for it to resolve.
       await audioElement.play();
     } catch (error) {
-      // Log errors for debugging, but don't crash the game.
-      // This can happen if the user hasn't interacted with the page yet.
       console.warn("Audio play failed:", error);
     }
+  }
+
+  function assignDOMElements() {
+    appContainer = document.querySelector('.app-container');
+    boardContainer = document.getElementById('board-container');
+    diceContainer = document.getElementById('dice-container');
+    diceElement = document.getElementById('dice');
+    femaleSwitch = document.getElementById('switch-female');
+    maleSwitch = document.getElementById('switch-male');
+    modal = document.getElementById('modal');
+    modalTitle = document.getElementById('modal-title');
+    modalText = document.getElementById('modal-text');
+    modalButton = document.getElementById('modal-button');
+    editorModal = document.getElementById('editor-modal');
+    closeEditorButton = document.getElementById('close-editor');
+    editorGrid = document.getElementById('editor-grid');
+    menuButton = document.querySelector('.menu-icons .icon-button:last-child');
+    setListContainer = document.getElementById('set-list-container');
+    addNewSetButton = document.getElementById('add-new-set');
+    resetButton = document.getElementById('reset-button');
+    audioDiceRoll = document.getElementById('audio-dice-roll');
+    audioPawnMove = document.getElementById('audio-pawn-move');
+    audioTaskComplete = document.getElementById('audio-task-complete');
   }
 
   function loadGameplayData() {
@@ -120,25 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('loveLudoGameplayData', JSON.stringify(gameplayData));
   }
 
-  function loadCellTasks() {
-    const savedTasks = localStorage.getItem('loveLudoCellTasks');
-    if (savedTasks) {
-      cellTasks = JSON.parse(savedTasks);
-    } else {
-      // Initialize with default tasks
-      cellTasks = Array(boardSize).fill("安全格，休息一下吧~");
-      // Pre-fill one as requested
-      cellTasks[4] = "说出对方最吸引你的一个特质。";
-    }
-  }
-
-  function saveCellTasks() {
-    localStorage.setItem('loveLudoCellTasks', JSON.stringify(cellTasks));
-  }
-
   function createPlayerElements() {
     players.forEach(player => {
-      if (player.element) player.element.remove(); // Remove old element if any
+      if (player.element) player.element.remove();
       const playerElement = document.createElement('div');
       playerElement.id = `player-${player.id}`;
       playerElement.classList.add('player');
@@ -149,21 +108,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /**
-   * Creates the game board UI
-   */
   function createBoard() {
     boardContainer.innerHTML = '';
     cellElements = [];
     const grid = document.createElement('div');
     grid.className = 'grid';
 
+    const gap = 4;
+    const containerWidth = boardContainer.clientWidth;
+    const cellWidth = (containerWidth / 7) - gap;
+
     cellCoordinates.forEach((coord, i) => {
       const cell = document.createElement('div');
       cell.classList.add('cell');
-      const gap = 4;
-      const containerWidth = boardContainer.clientWidth;
-      const cellWidth = (containerWidth / 7) - gap;
       cell.style.position = 'absolute';
       cell.style.left = `${coord.c * (cellWidth + gap)}px`;
       cell.style.top = `${coord.r * (cellWidth + gap)}px`;
@@ -184,13 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     boardContainer.appendChild(grid);
   }
 
-  /**
-   * Updates the position of a player's piece on the board
-   */
   function updatePlayerPosition(player) {
-    if (!player.element) return;
+    if (!player.element || !cellElements[player.position]) return;
     const cell = cellElements[player.position];
-    if (!cell) return;
 
     const otherPlayer = players.find(p => p.id !== player.id);
     let offset = 0;
@@ -236,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupDiceFaces() {
     const faces = diceElement.querySelectorAll('.face');
     faces.forEach(face => {
-      face.innerHTML = ''; // Clear existing dots
+      face.innerHTML = '';
       const dotCount = parseInt(face.dataset.dots, 10);
       for (let i = 0; i < dotCount; i++) {
         const dot = document.createElement('div');
@@ -246,145 +199,93 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /**
-   * Rolls the dice and moves the player
-   */
   function rollDice() {
     if (!isGameActive) return;
     isGameActive = false;
-
-    // Play sound safely
     playSound(audioDiceRoll);
-
-    // Generate a random roll
     const roll = Math.floor(Math.random() * 6) + 1;
-
-    // Apply rotation for the 3D dice effect
-    // These rotations are chosen to show the correct face for a standard dice layout
     const rotations = {
-      1: 'rotateY(0deg)',       // Face 1 -> Front
-      2: 'rotateX(90deg)',      // Face 2 -> Bottom
-      3: 'rotateY(-90deg)',     // Face 3 -> Right
-      4: 'rotateY(90deg)',      // Face 4 -> Left
-      5: 'rotateX(-90deg)',     // Face 5 -> Top
-      6: 'rotateY(180deg)'      // Face 6 -> Back
+      1: 'rotateY(0deg)', 2: 'rotateX(90deg)', 3: 'rotateY(-90deg)',
+      4: 'rotateY(90deg)', 5: 'rotateX(-90deg)', 6: 'rotateY(180deg) rotateX(180deg)'
     };
-    // Add some random spin for a more dynamic feel
-    const randomX = (Math.floor(Math.random() * 4)) * 360;
-    const randomY = (Math.floor(Math.random() * 4)) * 360;
-    const randomZ = (Math.floor(Math.random() * 4)) * 360;
-
-    diceElement.style.transform = `rotateX(${randomX}deg) rotateY(${randomY}deg) rotateZ(${randomZ}deg) ${rotations[roll]}`;
+    diceElement.style.transform = `rotateX(720deg) rotateY(720deg) rotateZ(720deg) ${rotations[roll]}`;
 
     setTimeout(() => {
       const player = players[currentPlayerIndex];
-      let endPosition = player.position + roll;
+      let newPosition = player.position + roll;
+      if (newPosition >= boardSize) newPosition = boardSize - 1;
 
       const onMoveComplete = () => {
-        const specialCell = boardLayout.find(c => c.index === player.position);
-        if (specialCell) {
-          handleSpecialCell(player, specialCell);
-        } else {
-          triggerTask();
-        }
+        handleSpecialCell(player, cellElements[player.position]);
       };
-      if (endPosition >= boardSize - 1) {
-        endPosition = boardSize - 1;
-        animateMove(player, endPosition, () => endGame(player));
-      } else {
-        animateMove(player, endPosition, onMoveComplete);
-      }
+
+      animateMove(player, newPosition, onMoveComplete);
     }, 1000);
   }
 
-  /**
-   * Handles landing on a special cell
-   */
   function handleSpecialCell(player, cell) {
-    let message = `${player.name} 踩到了特殊格子!`;
-    if (cell.type === 'backward') {
-      message = `${player.name} 踩到了后退格!`;
-    } else if (cell.type === 'flag') {
-      message = `${player.name} 到达安全区!`;
-    }
-
-    showModal(`特殊格子: ${cell.icon}`, message, "继续");
-    modalButton.onclick = () => {
-      modal.classList.remove('visible');
-      if (cell.type === 'backward') {
-        let endPos = player.position + cell.value;
-        if (endPos < 0) endPos = 0;
-
-        // After the special move, trigger a task.
-        animateMove(player, endPos, triggerTask);
-
-      } else {
-        // For non-moving special cells like 'flag', just trigger a task.
-        triggerTask();
+    const specialType = cell.dataset.special;
+    if (specialType) {
+      switch (specialType) {
+        case 'finish':
+          endGame(player);
+          return;
       }
-    };
+    }
+    triggerTask();
   }
 
-  /**
-   * Switches to the next player
-   */
   function switchPlayer() {
     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    femaleSwitch.classList.toggle('active', currentPlayerIndex === 0);
-    maleSwitch.classList.toggle('active', currentPlayerIndex === 1);
     isGameActive = true;
+    if (currentPlayerIndex === 0) {
+      femaleSwitch.classList.add('active');
+      maleSwitch.classList.remove('active');
+    } else {
+      maleSwitch.classList.add('active');
+      femaleSwitch.classList.remove('active');
+    }
   }
 
-  /**
-   * Ends the game and shows a winner message
-   */
   function endGame(winner) {
     isGameActive = false;
-    showModal('游戏结束!', `恭喜玩家 ${winner.name} 获得了胜利!`, '再来一局');
+    showModal(`游戏结束！`, `恭喜 ${winner.name} 到达终点！`, '重新开始');
     playSound(audioTaskComplete);
     modalButton.onclick = resetGame;
   }
 
-  /**
-   * Shows a modal dialog
-   */
   function showModal(title, text, buttonText) {
     modalTitle.textContent = title;
     modalText.textContent = text;
     modalButton.textContent = buttonText;
-    modal.classList.add('visible');
-    if (title !== '游戏结束!') {
-      playSound(audioTaskComplete);
-    }
+    modal.classList.add('active');
   }
 
-  /**
-   * Resets the game to its initial state
-   */
   function resetGame() {
     players.forEach(p => p.position = 0);
     currentPlayerIndex = 0;
     isGameActive = true;
-    createBoard(); // Re-create board to clear any lingering states
-    createPlayerElements(); // Re-create player elements
+    createBoard();
+    createPlayerElements();
     players.forEach(p => updatePlayerPosition(p));
     modal.classList.remove('active');
-    switchPlayer(); // To set the correct active UI on the switch
-    switchPlayer(); // Call it twice to get back to player 1
+    if (currentPlayerIndex !== 0) switchPlayer();
   }
 
   function triggerTask() {
     const activeSet = gameplayData.gameplaySets[gameplayData.activeSetId];
+    const player = players[currentPlayerIndex];
     let task = "安全格，休息一下吧~";
-    if (activeSet.type === 'random') {
-      task = defaultTasks[Math.floor(Math.random() * defaultTasks.length)];
-    } else {
-      const player = players[currentPlayerIndex];
-      task = activeSet.tasks[player.position] || task;
+    if (activeSet) {
+      if (activeSet.type === 'custom' && activeSet.tasks[player.position]) {
+        task = activeSet.tasks[player.position];
+      } else {
+        task = defaultTasks[Math.floor(Math.random() * defaultTasks.length)];
+      }
     }
-    showModal('情侣任务 ❤️', task, "任务完成");
+    showModal('任务来了！', task, '完成任务');
     modalButton.onclick = () => {
-      modal.classList.remove('visible');
+      modal.classList.remove('active');
       playSound(audioTaskComplete);
       switchPlayer();
     };
@@ -399,66 +300,55 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSetManager() {
     setListContainer.innerHTML = '';
     Object.values(gameplayData.gameplaySets).forEach(set => {
-      // Create a container for the button and its actions
-      const setItemContainer = document.createElement('div');
-      setItemContainer.className = 'set-item-container';
+      const setContainer = document.createElement('div');
+      setContainer.className = 'set-item-container';
 
       const setButton = document.createElement('button');
       setButton.className = 'set-btn';
       setButton.textContent = set.name;
-      setButton.dataset.setId = set.id;
       if (set.id === gameplayData.activeSetId) {
         setButton.classList.add('active');
       }
-      setButton.addEventListener('click', () => switchActiveSet(set.id));
+      setButton.onclick = () => switchActiveSet(set.id);
+      setContainer.appendChild(setButton);
 
-      setItemContainer.appendChild(setButton);
-
-      // Add rename and delete buttons for custom sets only
-      if (set.type !== 'random') {
+      if (set.type === 'custom') {
         const renameBtn = document.createElement('button');
         renameBtn.className = 'set-action-btn rename-btn';
-        renameBtn.innerHTML = '✏️'; //Pencil icon
-        renameBtn.title = '重命名';
-        renameBtn.addEventListener('click', () => renameSet(set.id));
-        setItemContainer.appendChild(renameBtn);
+        renameBtn.textContent = '✏️';
+        renameBtn.onclick = () => renameSet(set.id);
+        setContainer.appendChild(renameBtn);
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'set-action-btn delete-btn';
-        deleteBtn.innerHTML = '🗑️'; // Trash can icon
-        deleteBtn.title = '删除';
-        deleteBtn.addEventListener('click', () => deleteSet(set.id));
-        setItemContainer.appendChild(deleteBtn);
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.onclick = () => deleteSet(set.id);
+        setContainer.appendChild(deleteBtn);
       }
-
-      setListContainer.appendChild(setItemContainer);
+      setListContainer.appendChild(setContainer);
     });
   }
 
   function renderTaskGrid() {
     editorGrid.innerHTML = '';
     const activeSet = gameplayData.gameplaySets[gameplayData.activeSetId];
-    if (activeSet.type === 'random') {
-      editorGrid.innerHTML = '<p style="text-align: center; padding: 20px;">"基础版"使用随机任务，无需编辑。</p>';
+    if (!activeSet || activeSet.type !== 'custom') {
+      editorGrid.innerHTML = '<p>只有自定义玩法可以编辑哦。请先新建一个玩法版本。</p>';
       return;
     }
     for (let i = 0; i < boardSize; i++) {
+      const item = document.createElement('div');
+      item.className = 'editor-item';
+      item.innerHTML = `<span class="cell-number">${i + 1}</span>`;
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'cell-task-input';
       input.value = activeSet.tasks[i] || '';
-      input.dataset.index = i;
-      input.addEventListener('input', (e) => {
-        const index = parseInt(e.target.dataset.index, 10);
-        activeSet.tasks[index] = e.target.value;
+      input.placeholder = '输入此格的任务...';
+      input.onchange = (e) => {
+        activeSet.tasks[i] = e.target.value;
         saveGameplayData();
-      });
-      const item = document.createElement('div');
-      item.className = 'editor-item';
-      const number = document.createElement('span');
-      number.className = 'cell-number';
-      number.textContent = `${i + 1}:`;
-      item.appendChild(number);
+      };
       item.appendChild(input);
       editorGrid.appendChild(item);
     }
@@ -471,119 +361,81 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function addNewSet() {
-    const newId = `custom_${Date.now()}`;
-    const newSetName = `自定义玩法 ${Object.keys(gameplayData.gameplaySets).length}`;
-    gameplayData.gameplaySets[newId] = {
-      id: newId,
-      name: newSetName,
-      type: 'cell_based',
-      tasks: Array(boardSize).fill("点击编辑任务...")
-    };
-    switchActiveSet(newId);
+    const setName = prompt('请输入新玩法版本的名称：', `自定义玩法 ${Object.keys(gameplayData.gameplaySets).length}`);
+    if (setName) {
+      const setId = `custom_${Date.now()}`;
+      gameplayData.gameplaySets[setId] = { id: setId, name: setName, type: 'custom', tasks: {} };
+      gameplayData.activeSetId = setId;
+      saveGameplayData();
+      renderEditor();
+    }
   }
 
   function renameSet(setId) {
-    const currentSet = gameplayData.gameplaySets[setId];
-    if (!currentSet) return;
-
-    const newName = prompt('请输入新的玩法名称：', currentSet.name);
-    if (newName && newName.trim() !== '') {
-      currentSet.name = newName.trim();
+    const newName = prompt('请输入新的名称：', gameplayData.gameplaySets[setId].name);
+    if (newName) {
+      gameplayData.gameplaySets[setId].name = newName;
       saveGameplayData();
-      renderSetManager(); // Re-render to show the new name
+      renderEditor();
     }
   }
 
   function deleteSet(setId) {
-    if (setId === 'basic') {
-      alert('基础版不能删除哦！');
-      return;
-    }
-    if (confirm(`确定要删除这个玩法版本吗？此操作不可撤销。`)) {
+    if (confirm(`确定要删除玩法 "${gameplayData.gameplaySets[setId].name}" 吗？`)) {
       delete gameplayData.gameplaySets[setId];
-      // If the deleted set was the active one, fall back to basic
       if (gameplayData.activeSetId === setId) {
         gameplayData.activeSetId = 'basic';
       }
       saveGameplayData();
-      renderEditor(); // Re-render the whole editor view
+      renderEditor();
     }
   }
 
-  function openEditor() {
-    renderEditor();
-    editorModal.style.display = 'flex';
-  }
-
-  function closeEditor() {
-    editorModal.style.display = 'none';
-    resetGame(); // Reset game to reflect any changes
-  }
-
-  function initGame() {
-    createBoard();
-    createPlayerElements();
-    players.forEach(p => updatePlayerPosition(p));
-    loadCellTasks();
-    loadGameplayData();
-    renderSetManager(); // Render the set manager UI
-    setupDiceFaces();
-    // Set initial active player switch
-    if (currentPlayerIndex === 0) {
-      femaleSwitch.classList.add('active');
-      maleSwitch.classList.remove('active');
-    } else {
-      maleSwitch.classList.add('active');
-      femaleSwitch.classList.remove('active');
-    }
-    setupEventListeners();
-    isGameActive = true; // Make game active after setup
-  }
-
-  function startGame() {
-    // Hide start screen and show the main app
-    startScreen.style.opacity = '0';
-    setTimeout(() => {
-      startScreen.style.display = 'none';
-    }, 500); // Match CSS transition time
-    appContainer.style.visibility = 'visible';
-
-    // IMPORTANT: Load audio assets now, after user interaction
-    audioDiceRoll.load();
-    audioPawnMove.load();
-    audioTaskComplete.load();
-
-    // Now, initialize the rest of the game
-    initGame();
-  }
-
-  function init() {
-    // Only set up the start button listener initially
-    startButton.addEventListener('click', startGame);
-  }
+  function openEditor() { editorModal.classList.add('active'); renderEditor(); }
+  function closeEditor() { editorModal.classList.remove('active'); }
 
   function setupEventListeners() {
     diceContainer.addEventListener('click', rollDice);
     resetButton.addEventListener('click', resetGame);
-    addNewSetButton.addEventListener('click', addNewSet);
+    femaleSwitch.addEventListener('click', () => { if (isGameActive && currentPlayerIndex !== 0) switchPlayer(); });
+    maleSwitch.addEventListener('click', () => { if (isGameActive && currentPlayerIndex !== 1) switchPlayer(); });
     menuButton.addEventListener('click', openEditor);
     closeEditorButton.addEventListener('click', closeEditor);
-    femaleSwitch.addEventListener('click', () => {
-      if (isGameActive && currentPlayerIndex !== 0) {
-        switchPlayer();
-      }
-    });
-    maleSwitch.addEventListener('click', () => {
-      if (isGameActive && currentPlayerIndex !== 1) {
-        switchPlayer();
-      }
-    });
-    window.addEventListener('resize', () => {
-      createBoard();
-      players.forEach(updatePlayerPosition);
-    });
+    addNewSetButton.addEventListener('click', addNewSet);
   }
 
-  // --- Initialisation ---
+  function initGame() {
+    assignDOMElements();
+    audioDiceRoll.load();
+    audioPawnMove.load();
+    audioTaskComplete.load();
+    createBoard();
+    createPlayerElements();
+    players.forEach(p => updatePlayerPosition(p));
+    loadGameplayData();
+    renderSetManager();
+    setupDiceFaces();
+    if (currentPlayerIndex === 0) {
+      femaleSwitch.classList.add('active');
+    } else {
+      maleSwitch.classList.add('active');
+    }
+    setupEventListeners();
+    isGameActive = true;
+  }
+
+  function startGame() {
+    startScreen.style.opacity = '0';
+    setTimeout(() => { startScreen.style.display = 'none'; }, 500);
+    document.querySelector('.app-container').style.visibility = 'visible';
+    initGame();
+  }
+
+  function init() {
+    startScreen = document.getElementById('start-screen-overlay');
+    startButton = document.getElementById('start-game-button');
+    startButton.addEventListener('click', startGame);
+  }
+
   init();
 }); 
