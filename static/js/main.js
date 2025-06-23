@@ -406,9 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function initGame() {
     assignDOMElements();
-    audioDiceRoll.load();
-    audioPawnMove.load();
-    audioTaskComplete.load();
     createBoard();
     createPlayerElements();
     players.forEach(p => updatePlayerPosition(p));
